@@ -10,7 +10,8 @@ The goal is to combine:
 Health policy insight (Medicaid spending)
 Data science (EDA + ML + time series)
 Real-world impact (chronic disease cost burden)
-📁 Dataset
+
+ Dataset
 Source: Medicaid Drug Spending Data
 Timeframe: 2019 – 2023
 Size: ~16,938 rows × 36 columns
@@ -22,7 +23,8 @@ Tot_Clms_YYYY – Number of claims
 Avg_Spnd_Per_Clm_YYYY – Average spending per claim
 Outlier_Flag_YYYY – High-cost indicator
 CAGR_Avg_Spnd_Per_Dsg_Unt_19_23 – Growth rate
-🎯 Objectives
+
+ Objectives
 Analyze spending trends for diabetes drugs
 Identify high-growth and high-cost medications
 Compute Year-over-Year (YoY) growth
@@ -47,6 +49,8 @@ Converted wide → long format
 Extracted year from column names
 Computed YoY % change
 df_long['YoY_Change_%'] = df_long.groupby('Brnd_Name')['Total_Spending'].pct_change() * 100
+
+
 💊 Diabetes Drugs Analyzed
 
 Includes major classes:
