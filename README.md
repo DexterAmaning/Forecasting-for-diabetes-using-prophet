@@ -29,17 +29,20 @@ Analyze spending trends for diabetes drugs
 Identify high-growth and high-cost medications
 Compute Year-over-Year (YoY) growth
 Forecast future spending using:
+
 SARIMAX
 Linear Regression
 Prophet
-🛠️ Tech Stack
+
+Tech Stack
 Libraries:
 pandas, numpy – Data processing
 matplotlib, seaborn – Visualization
 scikit-learn – Regression models
 statsmodels – Time series (SARIMAX)
 prophet – Forecasting
-📊 Data Processing Pipeline
+
+Data Processing Pipeline
 1. Data Cleaning
 Removed missing values
 Filtered relevant columns
@@ -81,16 +84,20 @@ Used for:
 
 Flexible trend + seasonality modeling
 Robust real-world forecasting
+
 📌 Key Insights
 Rapid growth in GLP-1 drugs (e.g., Ozempic, Mounjaro)
 Insulin spending remains stable but high
 Significant cost escalation in newer therapies
 Medicaid burden is increasingly driven by chronic disease drugs
+
 🚀 Future Work
 Add 2022–2023 full dataset integration
 Build drug-level forecasting dashboards (Streamlit)
 Incorporate patient-level claims data
 Link spending to health outcomes (HbA1c, complications)
+
+
 💡 Real-World Impact
 
 This project supports:
