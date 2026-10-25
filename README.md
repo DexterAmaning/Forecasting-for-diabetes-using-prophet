@@ -37,6 +37,8 @@ Each model was fit on 2020–2022 and scored on held-out 2023–2024 values:
 
 With annual data, Prophet has no seasonality to model and too few points for changepoints, so it reduces to a straight line and adds nothing over simple baselines. No model anticipated the 2024 insulin repricing. The notebook's 2025–2026 numbers are therefore presented as **illustrative trend scenarios, not forecasts**.
 
+**Uncertainty intervals are not shown.** In the same backtest, Prophet's 80% interval contained **0 of the 10** held-out values (5 series × 2 years). With no changepoints, Prophet's interval reflects only the scatter of three points around a straight line, not real forecast error, and five annual observations are too few to validate an interval from any method. The projection table and figure therefore show point projections only.
+
 ## Methods
 
 1. Verify the raw file against its SHA-256 checksum. Keep the national `Overall` rows only.
@@ -49,7 +51,7 @@ With annual data, Prophet has no seasonality to model and too few points for cha
 
 - **Gross, pre-rebate spending.** Medicaid rebates are large for brand-name drugs; net cost and its trend aren't observable here.
 - **No indication data.** SGLT2 inhibitors are also used for heart failure and kidney disease.
-- **Five annual points.** That's too few to validate a forecasting model.
+- **Five annual points.** That's too few to validate a forecasting model or to estimate a trustworthy prediction interval. The backtest has only two held-out years per series, and its 10 held-out values aren't independent.
 - **National aggregates only.** There's no link to clinical outcomes.
 
 ## Reproduce
