@@ -1,124 +1,87 @@
-# Forecasting-for-diabetes-using-prophet
-Medicaid Diabetes Drugs Spending Forecast (2019–2025)
+# Medicaid Spending on Diabetes Medicines, 2020–2024
 
-🔍 Overview
+How Medicaid's spending on diabetes medicines changed over five years, which drug classes drove it, whether the growth came from more prescriptions or costlier ones, and whether simple models (including Prophet) can forecast it.
 
-This project analyzes Medicaid drug spending trends with a focus on diabetes medications, and builds forecasting models to understand future cost trajectories.
+All results come from the official CMS *Medicaid Spending by Drug* file (data year 2024 release) and are reproduced by one notebook: [`notebooks/medicaid_diabetes_spending.ipynb`](notebooks/medicaid_diabetes_spending.ipynb).
 
-The goal is to combine:
+![Spending by class](reports/figures/spending_by_class.png)
 
-Health policy insight (Medicaid spending)
-Data science (EDA + ML + time series)
-Real-world impact (chronic disease cost burden)
+## Key results
 
- Dataset
-Source: Medicaid Drug Spending Data
-Timeframe: 2019 – 2023
-Size: ~16,938 rows × 36 columns
-Key Variables:
-Brnd_Name – Drug brand name
-Gnrc_Name – Generic name
-Tot_Spndng_YYYY – Total spending per year
-Tot_Clms_YYYY – Number of claims
-Avg_Spnd_Per_Clm_YYYY – Average spending per claim
-Outlier_Flag_YYYY – High-cost indicator
-CAGR_Avg_Spnd_Per_Dsg_Unt_19_23 – Growth rate
+Gross spending before rebates; obesity-labeled incretins (Wegovy, Zepbound, Saxenda) excluded from diabetes totals.
 
- Objectives
-Analyze spending trends for diabetes drugs
-Identify high-growth and high-cost medications
-Compute Year-over-Year (YoY) growth
-Forecast future spending using:
+| | 2020 | 2024 | CAGR |
+|---|---|---|---|
+| All diabetes medicines | $7.78bn | $13.70bn | 15.2% |
+| GLP-1 / GIP-GLP-1 receptor agonists | $1.50bn | $7.21bn | 48.1% |
+| SGLT2 inhibitors | $0.81bn | $3.34bn | 42.6% |
+| Insulin | $4.24bn | $1.73bn | −20.0% |
+| Obesity-labeled incretins (excluded) | $0.01bn | $1.56bn | n/a |
 
-SARIMAX
-Linear Regression
-Prophet
+- **GLP-1 receptor agonists rose from 19% to 53% of diabetes-medicine spending.** Most of the class's growth came from more claims rather than higher spending per claim.
+- **Diabetes spending peaked in 2023 ($14.82bn) and fell in 2024.** The cause was insulin: gross spending fell 57% while claims fell 10.5%, consistent with the 2024 insulin list-price changes.
+- Across all classes, most growth came from higher *spending per claim*. That reflects a shift toward branded incretins, not price increases on the same products.
 
-Tech Stack
-Libraries:
-pandas, numpy – Data processing
-matplotlib, seaborn – Visualization
-scikit-learn – Regression models
-statsmodels – Time series (SARIMAX)
-prophet – Forecasting
+![Growth decomposition](reports/figures/growth_decomposition.png)
 
-Data Processing Pipeline
-1. Data Cleaning
-Removed missing values
-Filtered relevant columns
-Focused on diabetes-related drugs
-2. Feature Engineering
-Converted wide → long format
-Extracted year from column names
-Computed YoY % change
-df_long['YoY_Change_%'] = df_long.groupby('Brnd_Name')['Total_Spending'].pct_change() * 100
+## Forecasting: an honest negative result
 
+Each model was fit on 2020–2022 and scored on held-out 2023–2024 values:
 
-💊 Diabetes Drugs Analyzed
+| Model | Mean MAPE across 5 series | MAPE, all-diabetes total |
+|---|---|---|
+| Drift | **24.3%** | 10.9% |
+| Linear trend | 25.5% | 10.9% |
+| Prophet (linear, no seasonality) | 25.6% | 10.9% |
+| Naive (last value) | 34.9% | 17.8% |
 
-Includes major classes:
+With annual data, Prophet has no seasonality to model and too few points for changepoints, so it reduces to a straight line and adds nothing over simple baselines. No model anticipated the 2024 insulin repricing. The notebook's 2025–2026 numbers are therefore presented as **illustrative trend scenarios, not forecasts**.
 
-GLP-1 agonists (Ozempic, Trulicity, Mounjaro)
-SGLT2 inhibitors (Jardiance, Farxiga)
-Insulin (Humalog, Lantus, NovoLog)
-Oral agents (Metformin, Januvia, Actos)
-📈 Visualization
-Multi-line plots of spending trends per drug
-Growth comparison across years
-Outlier detection patterns
-🔮 Forecasting Models
-1. SARIMAX
+## Methods
 
-Used for:
+1. Verify the raw file against its SHA-256 checksum. Keep the national `Overall` rows only.
+2. Classify products into therapeutic classes from the generic name (`src/diabetes_spending.py`, unit-tested). Obesity-labeled brands are separated out.
+3. Reshape wide year columns to long format and aggregate by class and year.
+4. Decompose log spending growth exactly into a claim-volume part and a spending-per-claim part.
+5. Backtest naive, drift, linear-trend and Prophet models, then project 2025–2026.
 
-Seasonality + trend modeling
-Time-series forecasting
-2. Linear Regression
+## Limitations
 
-Used for:
+- **Gross, pre-rebate spending.** Medicaid rebates are large for brand-name drugs; net cost and its trend aren't observable here.
+- **No indication data.** SGLT2 inhibitors are also used for heart failure and kidney disease.
+- **Five annual points.** That's too few to validate a forecasting model.
+- **National aggregates only.** There's no link to clinical outcomes.
 
-Baseline trend prediction
-3. Prophet
+## Reproduce
 
-Used for:
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+python scripts/download_data.py   # verifies the committed CMS file (re-downloads if missing)
+pytest
+jupyter nbconvert --to notebook --execute --inplace notebooks/medicaid_diabetes_spending.ipynb
+```
 
-Flexible trend + seasonality modeling
-Robust real-world forecasting
+Tested with Python 3.13.
 
-📌 Key Insights
-Rapid growth in GLP-1 drugs (e.g., Ozempic, Mounjaro)
-Insulin spending remains stable but high
-Significant cost escalation in newer therapies
-Medicaid burden is increasingly driven by chronic disease drugs
+## Repository layout
 
-🚀 Future Work
-Add 2022–2023 full dataset integration
-Build drug-level forecasting dashboards (Streamlit)
-Incorporate patient-level claims data
-Link spending to health outcomes (HbA1c, complications)
+```
+data/raw/        CMS source file (public domain) + data/README.md provenance
+notebooks/       analysis notebook (executed, outputs included)
+reports/figures/ figures written by the notebook
+scripts/         data download and checksum verification
+src/             drug classification, reshaping, decomposition, forecast baselines
+tests/           pytest suite (classification rules, transforms, data checksum)
+```
 
+## Changes from the earlier version
 
-💡 Real-World Impact
+The previous notebook (`Medicaid.ipynb`) loaded the CMS file but ran its trend analysis and Prophet forecasts on **hand-typed placeholder numbers**, and its README described SARIMAX and regression models that weren't implemented. This version replaces it entirely. Every reported figure is computed from CMS data.
 
-This project supports:
+## Author
 
-Healthcare cost optimization
-Policy decision-making (Medicaid/Medicare)
-Early intervention strategies in diabetes care
-🧠 Author
+Prince Kwarteng Amaning. MS Data Science, University of Michigan–Dearborn. Background in dentistry and public health.
 
-Prince Kwarteng Amaning
-MS Data Science – University of Michigan–Dearborn
-Background: Dentistry + Public Health + AI
-
-Focus:
-
-AI-driven healthcare systems, diabetes screening, and cost optimization
-
-⚙️ How to Run
-pip install pandas numpy matplotlib seaborn scikit-learn statsmodels prophet
-python main.py
-📬 Contact
-
-For collaboration or research:
-dexterkwarteng@gmail.com
+License: MIT (code). The CMS data is a U.S. government work.
