@@ -1,5 +1,7 @@
 # Medicaid Spending on Diabetes Medicines, 2020–2024
 
+[![CI](https://github.com/DexterAmaning/Forecasting-for-diabetes-using-prophet/actions/workflows/ci.yml/badge.svg)](https://github.com/DexterAmaning/Forecasting-for-diabetes-using-prophet/actions/workflows/ci.yml)
+
 How Medicaid's spending on diabetes medicines changed over five years, which drug classes drove it, whether the growth came from more prescriptions or costlier ones, and whether simple models (including Prophet) can forecast it.
 
 All results come from the official CMS *Medicaid Spending by Drug* file (data year 2024 release) and are reproduced by one notebook: [`notebooks/medicaid_diabetes_spending.ipynb`](notebooks/medicaid_diabetes_spending.ipynb).
@@ -35,7 +37,7 @@ Each model was fit on 2020–2022 and scored on held-out 2023–2024 values:
 | Prophet (linear, no seasonality) | 25.6% | 10.9% |
 | Naive (last value) | 34.9% | 17.8% |
 
-With annual data, Prophet has no seasonality to model and too few points for changepoints, so it reduces to a straight line and adds nothing over simple baselines. No model anticipated the 2024 insulin repricing. The notebook's 2025–2026 numbers are therefore presented as **illustrative trend scenarios, not forecasts**.
+With annual data, Prophet has no seasonality to model, and its changepoints are switched off because three training points can't support any, so it reduces to a straight line and adds nothing over simple baselines. No model anticipated the 2024 fall in insulin spending, which coincided with insulin list-price changes. The notebook's 2025–2026 numbers are therefore presented as **illustrative trend scenarios, not forecasts**.
 
 **Uncertainty intervals are not shown.** In the same backtest, Prophet's 80% interval contained **0 of the 10** held-out values (5 series × 2 years). With no changepoints, Prophet's interval reflects only the scatter of three points around a straight line, not real forecast error, and five annual observations are too few to validate an interval from any method. The projection table and figure therefore show point projections only.
 
@@ -67,6 +69,8 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/medicaid_diabetes_
 
 Tested with Python 3.13.
 
+On every push, GitHub Actions runs the tests with network access blocked, static checks (pyflakes, compilation) and a full notebook re-execution; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
 ## Repository layout
 
 ```
@@ -75,7 +79,8 @@ notebooks/       analysis notebook (executed, outputs included)
 reports/figures/ figures written by the notebook
 scripts/         data download and checksum verification
 src/             drug classification, reshaping, decomposition, forecast baselines
-tests/           pytest suite (classification rules, transforms, data checksum)
+tests/           pytest suite (classification rules, transforms, data checksum,
+                 Prophet configuration and backtest, README-notebook consistency)
 ```
 
 ## Changes from the earlier version
